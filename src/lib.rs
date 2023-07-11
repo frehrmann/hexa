@@ -1,3 +1,5 @@
+use std::ops::{AddAssign, Add, SubAssign, Sub, MulAssign, Mul};
+
 /// Axial coordinates for hexagon maps.
 #[derive(Default, Debug, Clone, Copy)]
 pub struct HexSizes {
@@ -23,8 +25,89 @@ impl Axial {
         -self.q-self.r
     }
 
+    pub fn length(&self) -> u32 {
+        (self.q.abs() + (self.q+self.r).abs() + self.r.abs()) as u32 / 2
+    }
+
+    pub fn distance_to(&self, other: Self) -> u32 {
+        (*self - other).length()
+    }
+
+    pub fn lerp(&self, other: Self, t: f32) -> (f32, f32) {
+        let (q1, r1) = *self * (1f32 - t);
+        let (q2, r2) = other * t;
+        (q1+q2, r1+r2)
+    }
+
+    pub fn point_on_line(p1: Self, p2: Self, dist: f32) -> Self {
+        let dist_p1_p2 = p1.distance_to(p2) as f32;
+        Axial::from(p1.lerp(p2, dist/dist_p1_p2))
+    }
+
+
 }
 
+impl AddAssign for Axial {
+    fn add_assign(&mut self, rhs: Self) {
+        self.q += rhs.q;
+        self.r += rhs.r;
+    }
+}
+
+impl Add for Axial {
+    type Output = Axial;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        let mut result = self;
+        result += rhs;
+        result
+    }
+}
+
+impl SubAssign for Axial {
+
+    fn sub_assign(&mut self, rhs: Self) {
+        self.q  -= rhs.q;
+        self.r -= rhs.r;
+    }
+}
+
+impl Sub for Axial {
+    type Output = Axial;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        let mut result = self;
+        result -= rhs;
+        result
+    }
+}
+
+impl MulAssign<i32> for Axial {
+
+    fn mul_assign(&mut self, rhs: i32) {
+        self.q *= rhs;
+        self.r *= rhs;
+    }
+
+}
+
+impl Mul<i32> for Axial {
+    type Output = Axial;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        let mut result = self;
+        result *= rhs;
+        result
+    }
+}
+
+impl Mul<f32> for Axial {
+    type Output = (f32, f32);
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        (self.q as f32 * rhs, self.r as f32 * rhs)
+    }
+}
 
 impl From<(i32, i32)> for Axial {
     fn from((q,r): (i32, i32)) -> Self {
