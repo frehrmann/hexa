@@ -1,3 +1,5 @@
+/// Following the gread page https://www.redblobgames.com/grids/hexagons/
+
 use std::ops::{AddAssign, Add, SubAssign, Sub, MulAssign, Mul};
 
 /// Axial coordinates for hexagon maps.
@@ -42,6 +44,14 @@ impl Axial {
     pub fn point_on_line(p1: Self, p2: Self, dist: f32) -> Self {
         let dist_p1_p2 = p1.distance_to(p2) as f32;
         Axial::from(p1.lerp(p2, dist/dist_p1_p2))
+    }
+
+    pub fn circle(&self, hex_radius: u32) -> CircleAroundHex {
+        CircleAroundHex::new(*self, hex_radius)
+    }
+
+    pub fn neighbours(&self) -> CircleAroundHex {
+        self.circle(1)
     }
 
 
@@ -154,6 +164,78 @@ impl From<(f32, f32)> for Axial {
 
 }
 
+/// Circle Iterator
+struct HexCircle {
+    hex_radius: i32,
+    leg_idx: usize,
+    hex_idx: i32,
+}
+
+impl HexCircle {
+    fn new(hex_radius: u32) -> Self {
+        HexCircle {
+            hex_radius: hex_radius as i32,
+            leg_idx: 0usize,
+            hex_idx: 0,
+        }
+    }
+
+    fn qr(&self) -> Option<(i32, i32)> {
+        match self.leg_idx {
+            0 => Some((-self.hex_idx,                     self.hex_radius)),
+            1 => Some((-self.hex_radius,                  self.hex_radius-self.hex_idx)),
+            2 => Some((-self.hex_radius + self.hex_idx,  -self.hex_idx)),
+            3 => Some(( self.hex_idx,                    -self.hex_radius)),
+            4 => Some(( self.hex_radius,                 -self.hex_radius+self.hex_idx)),
+            5 => Some(( self.hex_radius-self.hex_idx,     self.hex_idx)),
+            _ => None,
+        }
+    }
+}
+
+impl Iterator for HexCircle {
+    type Item = Axial;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.leg_idx > 5 {
+            return None;
+        }
+        let qr = self.qr();
+        if self.hex_radius == 0 {
+            self.leg_idx = 6;
+        } else if self.hex_idx < (self.hex_radius - 1) {
+            self.hex_idx += 1;
+        } else {
+            self.hex_idx = 0;
+            self.leg_idx += 1;
+        }
+        qr.map(|v| Axial::from(v))
+    }
+}
+
+/// Circle around a given hexagon
+pub struct CircleAroundHex {
+    circle: HexCircle,
+    center: Axial,
+}
+
+impl Iterator for CircleAroundHex {
+    type Item = Axial;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.circle.next().map(|v| v + self.center)
+    }
+}
+
+impl CircleAroundHex {
+    pub fn new(center: Axial, radius: u32) -> Self {
+        CircleAroundHex {
+            circle: HexCircle::new(radius),
+            center
+        }
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -200,5 +282,40 @@ mod tests {
         assert_eq!(c.distance_to(a), 8);
         assert_eq!(a.lerp(c, 0.5f32), (1.5f32, 4.5f32));
         assert_eq!(Axial::point_on_line(a, c, 4f32), Axial::from((1.5f32, 4.5f32)));
+    }
+
+    #[test]
+    fn test_circle() {
+        let mut ai = HexCircle::new(0);
+        assert_eq!(ai.next(), Some(Axial::default()));
+        assert!(ai.next().is_none());
+        let mut ai = HexCircle::new(2);
+        assert_eq!(ai.next(), Some(Axial::new(0, 2)));
+        assert_eq!(ai.next(), Some(Axial::new(-1, 2)));
+        assert_eq!(ai.next(), Some(Axial::new(-2, 2)));
+        assert_eq!(ai.next(), Some(Axial::new(-2, 1)));
+        assert_eq!(ai.next(), Some(Axial::new(-2, 0)));
+        assert_eq!(ai.next(), Some(Axial::new(-1, -1)));
+        assert_eq!(ai.next(), Some(Axial::new(0, -2)));
+        assert_eq!(ai.next(), Some(Axial::new(1, -2)));
+        assert_eq!(ai.next(), Some(Axial::new(2, -2)));
+        assert_eq!(ai.next(), Some(Axial::new(2, -1)));
+        assert_eq!(ai.next(), Some(Axial::new(2, 0)));
+        assert_eq!(ai.next(), Some(Axial::new(1, 1)));
+        assert!(ai.next().is_none());
+        let mut ai = Axial::new(1, -1).circle(2);
+        assert_eq!(ai.next(), Some(Axial::new(1, 1)));
+        assert_eq!(ai.next(), Some(Axial::new(0, 1)));
+        assert_eq!(ai.next(), Some(Axial::new(-1, 1)));
+        assert_eq!(ai.next(), Some(Axial::new(-1, 0)));
+        assert_eq!(ai.next(), Some(Axial::new(-1, -1)));
+        assert_eq!(ai.next(), Some(Axial::new(0, -2)));
+        assert_eq!(ai.next(), Some(Axial::new(1, -3)));
+        assert_eq!(ai.next(), Some(Axial::new(2, -3)));
+        assert_eq!(ai.next(), Some(Axial::new(3, -3)));
+        assert_eq!(ai.next(), Some(Axial::new(3, -2)));
+        assert_eq!(ai.next(), Some(Axial::new(3, -1)));
+        assert_eq!(ai.next(), Some(Axial::new(2, 0)));
+        assert!(ai.next().is_none());
     }
 }
