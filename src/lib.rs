@@ -109,6 +109,22 @@ impl Mul<f32> for Axial {
     }
 }
 
+impl Mul<Axial> for i32 {
+    type Output = Axial;
+
+    fn mul(self, rhs: Axial) -> Self::Output {
+       rhs * self
+    }
+}
+
+impl Mul<Axial> for f32 {
+    type Output = (f32, f32);
+
+    fn mul(self, rhs: Axial) -> Self::Output {
+        rhs * self
+    }
+}
+
 impl From<(i32, i32)> for Axial {
     fn from((q,r): (i32, i32)) -> Self {
         Axial::new(q, r)
@@ -159,5 +175,30 @@ mod tests {
 
         let a: Axial = Axial::from((2.3f32, -13.6f32));
         assert_eq!((a.q, a.r), (2, -13));
+    }
+
+    #[test]
+    fn test_ops() {
+        let a = Axial::default();
+        let b: Axial = Axial::new(1, 2);
+        assert_eq!(a+b, Axial::new(1, 2));
+        assert_eq!(a-b, Axial::new(-1, -2));
+        assert_eq!(2*b, Axial::new(2, 4));
+        assert_eq!(-0.5f32*b, (-0.5f32, -1.0f32));
+    }
+
+    #[test]
+    fn test_math() {
+        let a = Axial::new(-1, 3);
+        assert_eq!(a.length(), 3);
+        assert_eq!(Axial::default().length(), 0);
+        assert_eq!(a.distance_to(Axial::default()), 3);
+        let b = Axial::new(2, -2);
+        assert_eq!(b.distance_to(a), 5);
+        assert_eq!(a.distance_to(b), 5);
+        let c = Axial::new(4, 6);
+        assert_eq!(c.distance_to(a), 8);
+        assert_eq!(a.lerp(c, 0.5f32), (1.5f32, 4.5f32));
+        assert_eq!(Axial::point_on_line(a, c, 4f32), Axial::from((1.5f32, 4.5f32)));
     }
 }
