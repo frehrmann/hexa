@@ -1,4 +1,4 @@
-/// Following the gread page https://www.redblobgames.com/grids/hexagons/
+/// Following the great page https://www.redblobgames.com/grids/hexagons/
 
 use std::ops::{AddAssign, Add, SubAssign, Sub, MulAssign, Mul};
 
@@ -45,6 +45,13 @@ impl Axial {
         self.circle(1)
     }
 
+    pub fn to_tuple(&self) -> (i32, i32) {
+        (self.q, self.r)
+    }
+
+    pub fn to_f32s(&self) -> (f32, f32) {
+        (self.q as f32, self.r as f32)
+    }
 
 }
 
@@ -152,8 +159,8 @@ impl From<(f32, f32)> for Axial {
 
         Axial::new(q, r)
     }
-
 }
+
 
 /// Circle Iterator
 struct HexCircle {
