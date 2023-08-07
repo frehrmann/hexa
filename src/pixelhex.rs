@@ -70,28 +70,16 @@ impl Hexagons for PixelHex {
         let qr = self.props.axial((x, y));
         let (_xr ,yr) = self.xy_ref(&qr);
         let dy =  y - yr;
-        let dqr1 = if dy < self.vert_extends.0 {
-            Axial::new(0, -1)
-        } else if dy > self.vert_extends.1 {
-            Axial::new(0, 1)
-        } else {
-            Axial::new(0, 0)
-        };
-        let qr2 = qr + dqr1;
+        let dr = -1 * (dy < self.vert_extends.0) as i32 + 1 * (dy > self.vert_extends.1) as i32;
+        let qr2 = qr + Axial::new(0, dr);
         let (xr ,yr) = self.xy_ref(&qr2);
         let (dx, dy) = (x - xr, y- yr);
         let ext = self.horiz_extends[(dy-self.vert_extends.0) as usize];
-        let dqr2 = if dx < ext.0 && dy <= 0.0f32 {
-            Axial::new(-1, 0)
-        } else if dx < ext.0 && dy > 0.0f32 {
-            Axial::new(-1, 1)
-        } else if dx > ext.1 && dy <= 0.0f32 {
-            Axial::new(1, -1)
-        } else if dx > ext.1 && dy >= 0.0f32 {
-            Axial::new(1, 0)
-        } else {
-            Axial::new(0, 0)
-        };
+        let dqr2 =
+            (dx < ext.0 && dy <= 0.0f32) as i32 * Axial::new(-1,  0) +
+            (dx < ext.0 && dy >  0.0f32) as i32 * Axial::new(-1,  1) +
+            (dx > ext.1 && dy <= 0.0f32) as i32 * Axial::new( 1, -1) +
+            (dx > ext.1 && dy >  0.0f32) as i32 * Axial::new( 1,  0);
         qr2 + dqr2
     }
 }
