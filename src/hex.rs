@@ -1,7 +1,7 @@
 /// Pixel hexagons might have a bit different spacings.
 
 use super::axial::Axial;
-use super::HexTop;
+use super::{HexTop, Hexagons};
 
 pub struct Props {
     top: HexTop,
@@ -40,13 +40,6 @@ impl Props {
         (x, y)
     }
 
-    pub fn xy(&self, qr: &Axial) -> (f32, f32) {
-        match self.top {
-            HexTop::FLAT => self.xy_flat(qr),
-            HexTop::POINTY => self.xy_pointy(qr),
-        }
-    }
-
     fn pointy_qr_from_xy(&self, (x, y): (f32, f32)) -> Axial {
         let q =  self.horz_spacing.recip() * x - 0.5f32 * self.vert_spacing.recip() * y;
         let r = self.vert_spacing.recip() * y;
@@ -59,15 +52,35 @@ impl Props {
         Axial::from((q, r))
     }
 
-    pub fn qr_from_xy(&self, xy : (f32, f32)) -> Axial {
+}
+
+impl Hexagons for Props {
+    fn horizontal_spacing(&self) -> f32 {
+        self.horz_spacing
+    }
+
+    fn vertical_spacing(&self) -> f32 {
+        self.vert_spacing
+    }
+
+    fn xy_ref(&self, qr: &Axial) -> (f32, f32) {
+        match self.top {
+            HexTop::FLAT => self.xy_flat(qr),
+            HexTop::POINTY => self.xy_pointy(qr),
+        }
+    }
+
+    fn xy_relative(&self, xy: (f32, f32)) -> (f32, f32) {
+        let (xc, yc) = self.xy_ref(&self.axial(xy));
+        (xy.0 -xc, xy.1 -yc)
+    }
+
+    fn axial(&self, xy: (f32, f32)) -> Axial {
         match self.top {
             HexTop::FLAT => self.flat_qr_from_xy(xy),
             HexTop::POINTY => self.pointy_qr_from_xy(xy),
         }
     }
-
-
-
 }
 
 
@@ -78,17 +91,17 @@ mod test {
     #[test]
     fn test_xy() {
         let h = Props::flat(7f32, 10f32);
-        assert_eq!(h.xy(&Axial::default()), (0f32, 0f32));
-        assert_eq!(h.xy(&Axial::new(1, 1)), (7f32, 15f32));
-        assert_eq!(h.xy(&Axial::new(-2, 1)), (-14f32, 0f32));
+        assert_eq!(h.xy_ref(&Axial::default()), (0f32, 0f32));
+        assert_eq!(h.xy_ref(&Axial::new(1, 1)), (7f32, 15f32));
+        assert_eq!(h.xy_ref(&Axial::new(-2, 1)), (-14f32, 0f32));
 
     }
 
     #[test]
     fn test_qr() {
         let h = Props::flat(7f32, 10f32);
-        assert_eq!(h.qr_from_xy((2f32, 2f32)), Axial::new(0, 0));
-        assert_eq!(h.qr_from_xy((7f32, 15f32)), Axial::new(1, 1));
-        assert_eq!(h.qr_from_xy((-13f32, 1f32)), Axial::new(-2, 1));
+        assert_eq!(h.axial((2f32, 2f32)), Axial::new(0, 0));
+        assert_eq!(h.axial((7f32, 15f32)), Axial::new(1, 1));
+        assert_eq!(h.axial((-13f32, 1f32)), Axial::new(-2, 1));
     }
 }

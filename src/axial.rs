@@ -154,10 +154,10 @@ impl From<(f32, f32)> for Axial {
         let one = q_diff > r_diff && q_diff > s_diff;
         let two = r_diff > s_diff;
 
-        let q = q as i32 * (!one as i32) - (r as i32 + s as i32) * (one as i32);
-        let r = r as i32 * (!two as i32) - (q as i32 + s as i32) * (two as i32);
+        let q_out = q as i32 * (!one as i32) - (r as i32 + s as i32) * (one as i32);
+        let r_out = r as i32 * (!two as i32) - (q as i32 + s as i32) * (two as i32);
 
-        Axial::new(q, r)
+        Axial::new(q_out, r_out)
     }
 }
 
