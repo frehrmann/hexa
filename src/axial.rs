@@ -155,7 +155,7 @@ impl From<(f32, f32)> for Axial {
         let two = r_diff > s_diff;
 
         let q_out = q as i32 * (!one as i32) - (r as i32 + s as i32) * (one as i32);
-        let r_out = r as i32 * (!two as i32) - (q as i32 + s as i32) * (two as i32);
+        let r_out = r as i32 * ((!two || one) as i32) - (q as i32 + s as i32) * ((two && !one)as i32);
 
         Axial::new(q_out, r_out)
     }
