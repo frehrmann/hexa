@@ -2,7 +2,7 @@ use super::axial::Axial;
 use super::Hexagons;
 use super::hex::Props;
 
-struct PixelHex {
+pub struct PixelHex {
     props: Props,
     vert_extends: (f32, f32),
     horiz_extends: Vec<(f32, f32)>,

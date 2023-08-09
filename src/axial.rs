@@ -151,11 +151,12 @@ impl From<(f32, f32)> for Axial {
         let r_diff = (r - r_f).abs();
         let s_diff = (s - s_f).abs();
 
-        let one = q_diff > r_diff && q_diff > s_diff;
-        let two = r_diff > s_diff;
+        let calc_q_b = q_diff > r_diff && q_diff > s_diff;
+        let calc_r = (calc_q_b && r_diff > s_diff) as i32;
+        let calc_q = calc_q_b as i32;
 
-        let q_out = q as i32 * (!one as i32) - (r as i32 + s as i32) * (one as i32);
-        let r_out = r as i32 * ((!two || one) as i32) - (q as i32 + s as i32) * ((two && !one)as i32);
+        let q_out = q as i32 * (1-calc_q) - (r as i32 + s as i32) * calc_q;
+        let r_out = r as i32 * (1-calc_r) - (q as i32 + s as i32) * calc_r;
 
         Axial::new(q_out, r_out)
     }

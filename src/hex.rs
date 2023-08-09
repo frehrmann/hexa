@@ -29,7 +29,7 @@ impl Props {
     fn xy_flat(&self, qr: &Axial) -> (f32, f32) {
         let (qf, rf) = qr.to_f32s();
         let x = qf * self.horz_spacing;
-        let y = (qf/2f32+rf) * self.vert_spacing;
+        let y = (0.5f32 * qf + rf) * self.vert_spacing;
         (x, y)
     }
 
