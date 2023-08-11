@@ -152,7 +152,7 @@ impl From<(f32, f32)> for Axial {
         let s_diff = (s - s_f).abs();
 
         let calc_q_b = q_diff > r_diff && q_diff > s_diff;
-        let calc_r = (calc_q_b && r_diff > s_diff) as i32;
+        let calc_r = (!calc_q_b && r_diff > s_diff) as i32;
         let calc_q = calc_q_b as i32;
 
         let q_out = q as i32 * (1-calc_q) - (r as i32 + s as i32) * calc_q;
