@@ -50,6 +50,8 @@ impl PixelHex {
             }
         }
     }
+
+
 }
 
 impl Hexagons for PixelHex {
@@ -75,16 +77,22 @@ impl Hexagons for PixelHex {
         let (_xr ,yr) = self.xy_ref(&qr);
         let dy =  y - yr;
         let dr = -1 * (dy < self.vert_extends.0) as i32 + 1 * (dy > self.vert_extends.1) as i32;
+
         let qr2 = qr + Axial::new(0, dr);
-        let (xr ,yr) = self.xy_ref(&qr2);
-        let (dx, dy) = (x - xr, y- yr);
-        let ext = self.horiz_extends[(dy-self.vert_extends.0) as usize];
-        let dqr2 =
-            (dx < ext.0 && dy <= 0.0f32) as i32 * Axial::new(-1,  0) +
-            (dx < ext.0 && dy >  0.0f32) as i32 * Axial::new(-1,  1) +
-            (dx > ext.1 && dy <= 0.0f32) as i32 * Axial::new( 1, -1) +
-            (dx > ext.1 && dy >  0.0f32) as i32 * Axial::new( 1,  0);
-        qr2 + dqr2
+
+        let (xr2 ,yr2) = self.xy_ref(&qr2);
+        let dx = x - xr2;
+        let dy2 = y - yr2;
+        let ext = self.horiz_extends[(dy2-self.vert_extends.0) as usize];
+        let dq = -1 * (dx < ext.0) as i32 + 1 * (dx > ext.1) as i32;
+
+        let qr3 = qr2 + Axial::new(dq, 0);
+
+        let (_xr ,yr3) = self.xy_ref(&qr3);
+        let dy3 =  y - yr3;
+        let dr3 = -1 * (dy3 < self.vert_extends.0) as i32 + 1 * (dy3 > self.vert_extends.1) as i32;
+
+        qr3 + Axial::new(0, dr3)
     }
 }
 
