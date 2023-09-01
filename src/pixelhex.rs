@@ -1,7 +1,11 @@
+use serde::{Serialize, Deserialize};
+
 use super::axial::Axial;
 use super::Hexagons;
 use super::hex::Props;
 
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PixelHex {
     props: Props,
     vert_extends: (f32, f32),

@@ -1,8 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 /// Pixel hexagons might have a bit different spacings.
 
 use super::axial::Axial;
 use super::{HexTop, Hexagons};
 
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Props {
     top: HexTop,
     vert_spacing: f32,

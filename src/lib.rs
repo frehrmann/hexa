@@ -4,9 +4,10 @@ pub mod hex;
 pub mod pixelhex;
 
 use axial::Axial;
+use serde::{Deserialize, Serialize};
 
 /// Defines how the hexagon is orientated.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Deserialize, Serialize)]
 pub enum HexTop {
     FLAT,
     POINTY,
