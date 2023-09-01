@@ -154,4 +154,72 @@ mod test {
         assert_eq!(h.axial((-2f32,  1f32)), Axial::new(-1,  1));
     }
 
+    static PIXELHEXRON: &str = "(
+        props: (
+            top: FLAT,
+            vert_spacing: 32.0,
+            horz_spacing: 29.0,
+        ),
+        vert_extends: (-16.0, 15.0),
+        horiz_extends: [
+            (-11.0, 10.0),
+            (-11.0, 10.0),
+            (-12.0, 11.0),
+            (-12.0, 11.0),
+            (-13.0, 12.0),
+            (-13.0, 12.0),
+            (-14.0, 13.0),
+            (-14.0, 13.0),
+            (-15.0, 14.0),
+            (-15.0, 14.0),
+            (-16.0, 15.0),
+            (-16.0, 15.0),
+            (-17.0, 16.0),
+            (-17.0, 16.0),
+            (-18.0, 17.0),
+            (-18.0, 17.0),
+            (-18.0, 17.0),
+            (-18.0, 17.0),
+            (-17.0, 16.0),
+            (-17.0, 16.0),
+            (-16.0, 15.0),
+            (-16.0, 15.0),
+            (-15.0, 14.0),
+            (-15.0, 14.0),
+            (-14.0, 13.0),
+            (-14.0, 13.0),
+            (-13.0, 12.0),
+            (-13.0, 12.0),
+            (-12.0, 11.0),
+            (-12.0, 11.0),
+            (-11.0, 10.0),
+            (-11.0, 10.0),
+        ],
+    )";
+
+    #[test]
+    fn test_bigger() {
+        let h: PixelHex = ron::from_str(PIXELHEXRON).unwrap();
+        assert_eq!(h.horizontal_spacing(), 29f32);
+        assert_eq!(h.vertical_spacing(), 32f32);
+        let ymin = h.vert_extends.0;
+        for x in -20..=20 {
+            assert_ne!(h.axial((x as f32, ymin - 1f32)), Axial::new(0, 0), "h.axial(({},{}))", x as f32, ymin - 1.0f32);
+        }
+        for (i, (x1, x2)) in h.horiz_extends.iter().enumerate() {
+            for x in (*x1 as i32-3)..=(*x1 as i32 - 1) {
+                assert_ne!(h.axial((x as f32, ymin + i as f32)), Axial::new(0,0 ), "h.axial(({},{}))", x as f32, ymin);
+            }
+            for x in (*x1 as i32)..=(*x2 as i32) {
+                assert_eq!(h.axial((x as f32, ymin + i as f32)), Axial::new(0,0 ), "h.axial(({},{}))", x as f32, ymin);
+            }
+            for x in (*x2 as i32+1)..=(*x2 as i32 +5) {
+                assert_ne!(h.axial((x as f32, ymin + i as f32)), Axial::new(0,0 ), "h.axial(({},{}))", x as f32, ymin);
+            }
+        }
+        for x in -20..=20 {
+            assert_ne!(h.axial((x as f32, h.vert_extends.1 + 1f32)), Axial::new(0, 0), "h.axial(({},{}))", x as f32, ymin);
+        }
+    }
+
 }
