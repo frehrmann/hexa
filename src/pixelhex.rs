@@ -81,14 +81,14 @@ impl Hexagons for PixelHex {
         let qr2 = qr + Axial::new(0, dr);
 
         let (xr2 ,yr2) = self.xy_ref(&qr2);
-        let dx = x - xr2;
+        let dx2 = x - xr2;
         let dy2 = y - yr2;
         let ext = self.horiz_extends[(dy2-self.vert_extends.0) as usize];
-        let dq = -1 * (dx < ext.0) as i32 + 1 * (dx > ext.1) as i32;
+        let dq = -1 * (dx2 < ext.0) as i32 + 1 * (dx2 > ext.1) as i32;
 
         let qr3 = qr2 + Axial::new(dq, 0);
 
-        let (_xr ,yr3) = self.xy_ref(&qr3);
+        let (_xr3 ,yr3) = self.xy_ref(&qr3);
         let dy3 =  y - yr3;
         let dr3 = -1 * (dy3 < self.vert_extends.0) as i32 + 1 * (dy3 > self.vert_extends.1) as i32;
 
